@@ -1,15 +1,39 @@
+import 'dart:js';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:verify/phone.dart';
+import 'package:verify/profile.dart';
 
 class MyVerify extends StatefulWidget {
-  const MyVerify({super.key});
+  final String mobileNumber;
+
+  const MyVerify({Key? key, required this.mobileNumber}) : super(key: key);
 
   @override
   State<MyVerify> createState() => _MyVerifyState();
 }
 
-class _MyVerifyState extends State<MyVerify> {
+// void _navigateToOtpPage() {
+//     Navigator.push(context as BuildContext ,
+//         MaterialPageRoute(builder: (context) => MyProfile()));
+// }
+
+class _MyVerifyState extends State<MyVerify> { 
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  void _navigateToProfilePage() {
+    Navigator.push(
+      context as BuildContext,
+      MaterialPageRoute(builder: (context) => MyProfile()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+
+    var code = "",
     return  Scaffold(
       body: Container(
         alignment: Alignment.center,
@@ -27,11 +51,18 @@ class _MyVerifyState extends State<MyVerify> {
             ),
             SizedBox(height: 10.0),
             Text(
-              "code is sent to 899938493",
+              "code is sent to ${widget.mobileNumber}",
               style: TextStyle(fontSize: 16.0),
             ),
             SizedBox(height: 10.0),
             //boxes to add otp
+            Pinput(
+              length :6,
+              showCursor : true,
+              onChanged: (value){
+                code=value;
+              }
+            )
             SizedBox(height: 20.0),
             Row(
 
@@ -57,8 +88,12 @@ class _MyVerifyState extends State<MyVerify> {
             ),
             SizedBox(height: 20.0),
             ElevatedButton(
-              onPressed: () {
-                // Handle button press
+              onPressed:() async{
+
+                PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: MyPhone.verify, smsCode: code);
+
+                // Sign the user in (or link) with the credential
+                await auth.signInWithCredential(credential);
               },
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 15.0),
